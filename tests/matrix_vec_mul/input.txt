@@ -1,0 +1,17 @@
+lvec 1 0 1
+lvec 2 4 1
+dot 0 1 2
+lvec 2 8 1
+dot 3 1 2
+swizzle 1 1 0 1 1
+add 0 3 0
+swizzle 1 0 1 2 3
+lvec 2 12 1
+dot 3 1 2
+swizzle 1 1 1 0 1
+add 0 3 0
+swizzle 1 0 1 2 3
+lvec 2 16 1
+dot 3 1 2
+swizzle 1 1 1 1 0
+add 0 3 0
