@@ -4,7 +4,9 @@ import sys
 class SimdPU:
     gprs = [[0,0,0,0]]*4
     swizzle_state = [[0,0,0,0]]*3
+    memory = [0]*1024
     fixed_shift = 0
+    reg_mask = 0b11
 
     def __init__(self):
         for i in range(4):
@@ -13,6 +15,10 @@ class SimdPU:
         for i in range(3):
             self.swizzle_state[i] = [0, 1, 2, 3]
         return
+        
+    def set_mem(self, mem_list):
+        for i in range(len(mem_list)):
+            self.memory[i] = mem_list[i]
 
     def swizzle(self, reg, vec):
         result = [0,0,0,0]
@@ -61,42 +67,50 @@ class SimdPU:
                 self.gprs[dst] = self.swizzle(0, self.vec_add(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "addi":
-                dst = int(vals[1]) & 0b11
-                srcA = int(vals[2]) & 0b11
+                dst = int(vals[1]) & self.reg_mask
+                srcA = int(vals[2]) & self.reg_mask
                 imm = int(vals[3]) & 0b111111
                 self.gprs[dst] = self.swizzle(0, self.vec_add(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, [imm, 0, 0, 0])))
             if vals[0] == "sub":
-                dst = int(vals[1])
-                srcA = int(vals[2])
-                srcB = int(vals[3])
+                dst = int(vals[1]) & self.reg_mask
+                srcA = int(vals[2]) & self.reg_mask
+                srcB = int(vals[3]) & self.reg_mask
                 self.gprs[dst] = self.swizzle(0, self.vec_sub(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "mul":
-                dst = int(vals[1]) & 0b11
-                srcA = int(vals[2]) & 0b11
-                srcB = int(vals[3]) & 0b11
+                dst = int(vals[1]) & self.reg_mask
+                srcA = int(vals[2]) & self.reg_mask
+                srcB = int(vals[3]) & self.reg_mask
                 self.gprs[dst] = self.swizzle(0, self.vec_mul(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "dot":
-                dst = int(vals[1]) & 0b11
-                srcA = int(vals[2]) & 0b11
-                srcB = int(vals[3]) & 0b11
+                dst = int(vals[1]) & self.reg_mask
+                srcA = int(vals[2]) & self.reg_mask
+                srcB = int(vals[3]) & self.reg_mask
                 self.gprs[dst] = self.swizzle(0, self.vec_dot(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "fshift":
                 amt = int(vals[1]) & 0b1111
                 self.fixed_shift = amt
             elif vals[0] == "swizzle":
-                reg = int(vals[1]) & 0b11
-                swizA = int(vals[2]) & 0b11
-                swizB = int(vals[3]) & 0b11
-                swizC = int(vals[4]) & 0b11
-                swizD = int(vals[5]) & 0b11
+                reg = int(vals[1]) & self.reg_mask
+                swizA = int(vals[2]) & self.reg_mask
+                swizB = int(vals[3]) & self.reg_mask
+                swizC = int(vals[4]) & self.reg_mask
+                swizD = int(vals[5]) & self.reg_mask
                 self.swizzle_state[reg][0] = swizA
                 self.swizzle_state[reg][1] = swizB
                 self.swizzle_state[reg][2] = swizC
                 self.swizzle_state[reg][3] = swizD
+            elif vals[0] == "lvec":
+                reg = int(vals[1]) & self.reg_mask
+                addr = int(vals[2])
+                inc = int(vals[3])
+                self.gprs[reg][0] = self.memory[addr + 0*inc]
+                self.gprs[reg][1] = self.memory[addr + 1*inc]
+                self.gprs[reg][2] = self.memory[addr + 2*inc]
+                self.gprs[reg][3] = self.memory[addr + 3*inc]
             elif vals[0] == "done":
                 break
 
@@ -110,13 +124,21 @@ def main():
     if len(sys.argv) < 2:
         print("Please pass file name in")
         return 0
-    
-
+        
     proc = SimdPU()
     prg = ""
     f = open(sys.argv[1])
     prg = f.read()
     f.close()
+    
+    if len(sys.argv) >= 3:
+        mem_list = []
+        f = open(sys.argv[2])
+        for line in f:
+            mem_list.append(int(line.strip()))
+        f.close()
+        
+        proc.set_mem(mem_list)
 
     proc.run_prg(prg)
     proc.print_state()
