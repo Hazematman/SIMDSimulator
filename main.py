@@ -111,6 +111,12 @@ class SimdPU:
                 self.gprs[reg][1] = self.memory[addr + 1*inc]
                 self.gprs[reg][2] = self.memory[addr + 2*inc]
                 self.gprs[reg][3] = self.memory[addr + 3*inc]
+            elif vals[0] == "rst":
+                reg = int(vals[1]) & self.reg_mask
+                self.gprs[reg][0] = 0
+                self.gprs[reg][1] = 0
+                self.gprs[reg][2] = 0
+                self.gprs[reg][3] = 0
             elif vals[0] == "done":
                 break
 
