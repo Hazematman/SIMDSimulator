@@ -58,31 +58,31 @@ class SimdPU:
                 dst = int(vals[1])
                 srcA = int(vals[2])
                 srcB = int(vals[3])
-                self.gprs[dst] = self.swizzle(0, self.vec_add(self.swizzle(1, self.gprs[srcA]), 
+                self.gprs[dst] = self.swizzle(0, self.vec_add(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "addi":
                 dst = int(vals[1]) & 0b11
                 srcA = int(vals[2]) & 0b11
                 imm = int(vals[3]) & 0b111111
-                self.gprs[dst] = self.swizzle(0, self.vec_add(self.swizzle(1, self.gprs[srcA]), 
+                self.gprs[dst] = self.swizzle(0, self.vec_add(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, [imm, 0, 0, 0])))
             if vals[0] == "sub":
                 dst = int(vals[1])
                 srcA = int(vals[2])
                 srcB = int(vals[3])
-                self.gprs[dst] = self.swizzle(0, self.vec_sub(self.swizzle(1, self.gprs[srcA]), 
+                self.gprs[dst] = self.swizzle(0, self.vec_sub(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "mul":
                 dst = int(vals[1]) & 0b11
                 srcA = int(vals[2]) & 0b11
                 srcB = int(vals[3]) & 0b11
-                self.gprs[dst] = self.swizzle(0, self.vec_mul(self.swizzle(1, self.gprs[srcA]), 
+                self.gprs[dst] = self.swizzle(0, self.vec_mul(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "dot":
                 dst = int(vals[1]) & 0b11
                 srcA = int(vals[2]) & 0b11
                 srcB = int(vals[3]) & 0b11
-                self.gprs[dst] = self.swizzle(0, self.vec_dot(self.swizzle(1, self.gprs[srcA]), 
+                self.gprs[dst] = self.swizzle(0, self.vec_dot(self.swizzle(1, self.gprs[srcA]),
                                                               self.swizzle(2, self.gprs[srcB])))
             elif vals[0] == "fshift":
                 amt = int(vals[1]) & 0b1111
